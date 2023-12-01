@@ -1,0 +1,21 @@
+* {
+  @include boxSizing;
+  margin: 0;
+  padding: 0;
+  font-family: 'Manrope', sans-serif !important;
+}
+
+body {
+  block-size: 100vh;
+}
+
+::selection {
+  background-color: var(--v-theme-background);
+  color: var(--text-clr);
+}
+
+[data-theme='dark'] {
+  ::-webkit-scrollbar {
+    background-color: rgb(31, 38, 50) !important;
+  }
+}

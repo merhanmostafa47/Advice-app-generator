@@ -1,0 +1,151 @@
+// Property In RTL
+@mixin rtl($property, $ltr-value, $rtl-value) {
+  #{$property}: $ltr-value;
+
+  body[dir='rtl'] & {
+    #{$property}: $rtl-value;
+  }
+}
+
+// Flex
+@mixin flex($justify, $align, $direction: row) {
+  display: flex;
+  justify-content: $justify;
+  align-items: $align;
+  flex-direction: $direction;
+}
+
+// Font
+@mixin font($weight, $size, $color: var(--text-clr)) {
+  font-weight: $weight;
+  font-size: $size;
+  color: $color;
+}
+
+// Size
+@mixin size($width, $height: auto) {
+  inline-size: $width;
+  block-size: $height;
+}
+
+@mixin lines($lines) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@mixin textEllipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@mixin boxSizing {
+  -moz-box-sizing: border-box;
+  -o-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+@mixin transitioning($t) {
+  -moz-transition: all $t ease-in-out;
+  -webkit-transition: all $t ease-in-out;
+  -o-transition: all $t ease-in-out;
+  transition: all $t ease-in-out;
+}
+
+@mixin colorTransitioning($ct) {
+  -moz-transition:
+    background $ct linear,
+    color $ct linear;
+  -webkit-transition:
+    background $ct linear,
+    color $ct linear;
+  -o-transition:
+    background $ct linear,
+    color $ct linear;
+  transition:
+    background $ct linear,
+    color $ct linear;
+}
+
+@mixin borderRadius($br) {
+  -moz-border-radius: $br;
+  -webkit-border-radius: $br;
+  -o-border-radius: $br;
+  border-radius: $br;
+}
+
+@mixin customBorderRadius($tl, $tr, $br, $bl) {
+  -moz-border-radius: $tl $tr $br $bl;
+  -o-border-radius: $tl $tr $br $bl;
+  -webkit-border-radius: $tl $tr $br $bl;
+  border-radius: $tl $tr $br $bl;
+}
+
+@mixin flexCenterAlignment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flexStartAlignment {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+@mixin verticalFlexStartAlignment {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+@mixin flexSpaceBetweenAlignment {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flexSpaceAroundAlignment {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+@mixin flexEndAlignment {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+// media queries
+@mixin media($point) {
+  @if $point==xs {
+    @media (max-width: 575px) {
+      @content;
+    }
+  } @else if $point==sm {
+    @media (max-width: 767px) {
+      @content;
+    }
+  } @else if $point==main {
+    @media (min-width: 768px) {
+      @content;
+    }
+  } @else if $point==md {
+    @media (max-width: 991px) {
+      @content;
+    }
+  } @else if $point==lg {
+    @media (min-width: 1024px) {
+      @content;
+    }
+  } @else if $point==xl {
+    @media (min-width: 1200px) {
+      @content;
+    }
+  }
+}

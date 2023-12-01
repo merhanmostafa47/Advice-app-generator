@@ -1,0 +1,9 @@
+// Start:: Importing Abstracts
+@import './abstracts/variables';
+@import './abstracts/mixins';
+// End:: Importing Abstracts
+
+// Start:: Importing Base Style Files
+@import './base/reset';
+@import './base/global';
+// End:: Importing Base Style Files
