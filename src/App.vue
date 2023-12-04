@@ -18,6 +18,7 @@ onMounted(() => {
 <style lang="scss" scoped>
 .v-application {
   background: var(--v-theme-background);
+  width: 100vw;
 
   .v-main {
     @include flexCenterAlignment;

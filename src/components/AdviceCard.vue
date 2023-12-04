@@ -1,40 +1,102 @@
 <template>
-  <div class="card_wrapper">
-    <span class="advice_num">advice #1</span>
-    <p class="advice_copy">
-      Lorem ipsum, dolor sit amet consectetur adipisicing elit. Cum sed aut quia at, dolor quo commodi,
-    </p>
-    <v-btn>
-      <IconDice />
-    </v-btn>
-  </div>
+  <loader v-if="!responseData" />
+  <template v-else>
+    <div class="card_wrapper">
+      <div>
+        <span class="advice_num">advice #{{ responseData?.id }}</span>
+
+        <p class="advice_copy">
+          {{ responseData?.advice }}
+        </p>
+      </div>
+
+      <div class="icons_wrapper">
+        <i v-if="funControl === 'pause'">
+          <IconPlay @click="funControl = 'play'" />
+        </i>
+        <i v-else>
+          <IconPause @click="(funControl = 'pause'), stopGetAdviceFun()" />
+        </i>
+      </div>
+
+      <v-btn @click="getAdvice">
+        <IconDice />
+      </v-btn>
+    </div>
+  </template>
 </template>
 
 <script setup lang="ts">
-import IconDice from '@/components/icons/IconDice.vue';
+import { ref } from "vue";
+import { setupAxios } from "@/plugins/axios";
+import IconDice from "@/components/icons/IconDice.vue";
+import IconPlay from "@/components/icons/IconPlay.vue";
+import IconPause from "@/components/icons/IconPause.vue";
+import loader from "@/components/loader.vue";
+
+// Destructure the returned object to get $axios
+const { $axios } = setupAxios();
+
+const funControl = ref<string>("play");
+
+interface ResponseData {
+  id: number;
+  advice: string;
+}
+
+const responseData = ref<ResponseData>();
+const error = ref(null);
+
+const intervalTime = ref(5000);
+
+// Get new advice every 5 seconds
+const funInterval = setInterval(() => {
+  getAdvice();
+}, intervalTime.value);
+
+function stopGetAdviceFun() {
+  clearInterval(funInterval);
+}
+
+// Make a GET request using the globally available Axios instance
+function getAdvice() {
+  $axios
+    .get("/advice")
+    .then((response) => {
+      responseData.value = response.data.slip;
+      console.log(responseData.value);
+    })
+    .catch((err) => {
+      error.value = err.message;
+    });
+}
 </script>
 
 <style lang="scss" scoped>
 .card_wrapper {
-  @include flexCenterAlignment;
-  flex-direction: column;
+  @include flex(space-between, center, column);
+  gap: 1rem;
   width: 25rem;
-  padding: 2rem;
+  min-block-size: 17rem;
+  padding: 2rem 2rem 3.5rem;
   background-color: var(--card-bg);
   border-radius: 1rem;
+  position: relative;
 
   @include media(sm) {
-    padding-inline: 1rem
+    padding-inline: 1.15rem;
   }
 
   .advice_num {
-    @include font(600, .825rem, var(--cyan-clr));
+    @include font(600, 0.825rem, var(--cyan-clr));
     text-transform: uppercase;
     letter-spacing: 0.3rem;
     margin-bottom: 1rem;
+    text-align: center;
+    display: block;
 
     @include media(sm) {
-      font-size: .75rem
+      font-size: 0.75rem;
     }
   }
 
@@ -44,7 +106,29 @@ import IconDice from '@/components/icons/IconDice.vue';
     line-height: 1.6;
 
     @include media(sm) {
-      font-size: 1rem
+      font-size: 1rem;
+    }
+  }
+
+  .icons_wrapper {
+    cursor: pointer;
+    position: relative;
+    inline-size: 100%;
+    @include flexCenterAlignment;
+
+    &:after {
+      position: absolute;
+      content: "";
+      @include size(100%, 0.3px);
+      background-color: var(--text-clr);
+      inset-inline: 0;
+      top: 41%;
+    }
+
+    i {
+      background-color: var(--card-bg);
+      z-index: 1;
+      padding-inline: 1rem;
     }
   }
 
@@ -52,8 +136,9 @@ import IconDice from '@/components/icons/IconDice.vue';
     background-color: var(--cyan-clr);
     border-radius: 50%;
     @include size(4rem, 4rem);
-    transform: translateY(100%);
-    transition: all .6s ease-in-out;
+    transition: all 0.6s ease-in-out;
+    position: absolute;
+    bottom: -2rem;
 
     &:hover {
       box-shadow: 0 0 26px 10px rgb(82 255 168 / 50%);
