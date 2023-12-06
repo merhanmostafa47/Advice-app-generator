@@ -1,6 +1,13 @@
 <template>
   <loader v-if="!responseData" />
   <template v-else>
+    <div
+      class="arrow arrow__left"
+      @click="getPreviousAdvice()"
+      :class="{ disable: disableLeftBtn }"
+    >
+      <IconArrowLeft />
+    </div>
     <div class="card_wrapper">
       <div>
         <span class="advice_num">advice #{{ responseData?.id }}</span>
@@ -12,16 +19,24 @@
 
       <div class="icons_wrapper">
         <i v-if="funControl === 'pause'">
-          <IconPlay @click="funControl = 'play'" />
+          <IconPlay @click="(funControl = 'play'), startInterval()" />
         </i>
         <i v-else>
-          <IconPause @click="(funControl = 'pause'), stopGetAdviceFun()" />
+          <IconPause @click="(funControl = 'pause'), stopInterval()" />
         </i>
       </div>
 
       <v-btn @click="getAdvice">
         <IconDice />
       </v-btn>
+    </div>
+
+    <div
+      class="arrow arrow__right"
+      @click="getNextAdvice()"
+      :class="{ disable: disableRightBtn }"
+    >
+      <IconArrowRight />
     </div>
   </template>
 </template>
@@ -32,35 +47,33 @@ import { setupAxios } from "@/plugins/axios";
 import IconDice from "@/components/icons/IconDice.vue";
 import IconPlay from "@/components/icons/IconPlay.vue";
 import IconPause from "@/components/icons/IconPause.vue";
+import IconArrowLeft from "@/components/icons/IconArrowLeft.vue";
+import IconArrowRight from "@/components/icons/IconArrowRight.vue";
 import loader from "@/components/loader.vue";
-
-// Destructure the returned object to get $axios
-const { $axios } = setupAxios();
-
-const funControl = ref<string>("play");
 
 interface ResponseData {
   id: number;
   advice: string;
 }
+// Destructure the returned object to get $axios
+const { $axios } = setupAxios();
 
 const responseData = ref<ResponseData>();
 const error = ref(null);
 
+const funControl = ref("play");
+
+const disableLeftBtn = ref(false);
+
+const disableRightBtn = ref(false);
+
 const intervalTime = ref(5000);
+let funInterval: any;
 
 const advicesArr = ref<ResponseData[]>([]);
 
-// Get new advice every 5 seconds
-const funInterval = setInterval(() => {
-  getAdvice();
-}, intervalTime.value);
+const currentIndex = ref(0);
 
-function stopGetAdviceFun() {
-  clearInterval(funInterval);
-}
-
-// Make a GET request using the globally available Axios instance
 function getAdvice() {
   $axios
     .get("/advice")
@@ -77,18 +90,83 @@ function getAdvice() {
         if (!exists) {
           advicesArr.value.push(responseData.value);
 
-          // Store advicesArr in local storage
+          // Store advicesArr in local storage to get the previous and next advice
           localStorage.setItem("Advices", JSON.stringify(advicesArr.value));
         }
+
+        currentIndex.value = advicesArr.value.length - 1;
       }
     })
     .catch((err) => {
       error.value = err.message;
     });
 }
+
+// Start the interval initially
+startInterval();
+
+// Function to start the interval
+function startInterval() {
+  funInterval = setInterval(() => {
+    getAdvice();
+  }, intervalTime.value);
+}
+
+// Function to stop the interval
+function stopInterval() {
+  clearInterval(funInterval);
+}
+
+// Function to get the previous advice
+function getPreviousAdvice() {
+  funControl.value = "pause";
+  stopInterval();
+  if (currentIndex.value > 0) {
+    currentIndex.value--;
+    responseData.value = advicesArr.value[currentIndex.value];
+    disableRightBtn.value = false;
+  } else {
+    disableLeftBtn.value = true;
+  }
+}
+
+// Function to get the next advice
+function getNextAdvice() {
+  if (currentIndex.value < advicesArr.value.length - 1) {
+    currentIndex.value++;
+    responseData.value = advicesArr.value[currentIndex.value];
+    disableLeftBtn.value = false;
+  } else {
+    disableRightBtn.value = true;
+  }
+}
 </script>
 
 <style lang="scss" scoped>
+.arrow {
+  background-color: var(--card-bg);
+  @include size(2rem, 2rem);
+  border-radius: 50%;
+  @include flexCenterAlignment;
+  position: relative;
+  z-index: 5;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+
+  &.disable {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &__left {
+    margin-inline-end: -1.5rem;
+  }
+
+  &__right {
+    margin-inline-start: -1.5rem;
+  }
+}
+
 .card_wrapper {
   @include flex(space-between, center, column);
   gap: 1rem;
