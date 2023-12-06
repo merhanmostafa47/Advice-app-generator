@@ -49,6 +49,8 @@ const error = ref(null);
 
 const intervalTime = ref(5000);
 
+const advicesArr = ref<ResponseData[]>([]);
+
 // Get new advice every 5 seconds
 const funInterval = setInterval(() => {
   getAdvice();
@@ -64,7 +66,21 @@ function getAdvice() {
     .get("/advice")
     .then((response) => {
       responseData.value = response.data.slip;
-      console.log(responseData.value);
+
+      if (responseData.value) {
+        // Check if the response already exists in advicesArr
+        const exists = advicesArr.value.some(
+          (adv) => adv.id === responseData.value?.id
+        );
+
+        // Add the response to advicesArr only if it doesn't exist
+        if (!exists) {
+          advicesArr.value.push(responseData.value);
+
+          // Store advicesArr in local storage
+          localStorage.setItem("Advices", JSON.stringify(advicesArr.value));
+        }
+      }
     })
     .catch((err) => {
       error.value = err.message;
