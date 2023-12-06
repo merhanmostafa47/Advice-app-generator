@@ -12,7 +12,7 @@
       <div>
         <span class="advice_num">advice #{{ responseData?.id }}</span>
 
-        <p class="advice_copy">
+        <p class="advice_copy" id="adviceText" @click="copyContent">
           {{ responseData?.advice }}
         </p>
       </div>
@@ -38,6 +38,8 @@
     >
       <IconArrowRight />
     </div>
+
+    <div class="alert_msg">Advice copied successfully!</div>
   </template>
 </template>
 
@@ -140,6 +142,24 @@ function getNextAdvice() {
     disableRightBtn.value = true;
   }
 }
+
+// Copy advice to clipboard
+async function copyContent() {
+  try {
+    let text = document.querySelector("#adviceText")?.innerHTML;
+    if (text) {
+      await navigator.clipboard.writeText(text);
+    }
+    setTimeout(() => {
+      document.querySelector(".alert_msg")?.classList.add("active");
+      setTimeout(() => {
+        document.querySelector(".alert_msg")?.classList.remove("active");
+      }, 3000);
+    }, 100);
+  } catch (err) {
+    console.error("Failed to copy: ", err);
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -170,7 +190,7 @@ function getNextAdvice() {
 .card_wrapper {
   @include flex(space-between, center, column);
   gap: 1rem;
-  width: 25rem;
+  width: 26rem;
   min-block-size: 17rem;
   padding: 2rem 2rem 3.5rem;
   background-color: var(--card-bg);
@@ -198,6 +218,7 @@ function getNextAdvice() {
     @include font(800, 1.25rem, var(--text-clr));
     text-align: center;
     line-height: 1.6;
+    cursor: pointer;
 
     @include media(sm) {
       font-size: 1rem;
@@ -237,6 +258,24 @@ function getNextAdvice() {
     &:hover {
       box-shadow: 0 0 26px 10px rgb(82 255 168 / 50%);
     }
+  }
+}
+
+.alert_msg {
+  position: absolute;
+  bottom: 0.5rem;
+  left: -100%;
+  min-inline-size: 15rem;
+  block-size: auto;
+  background-color: var(--card-bg);
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  font-size: 14px;
+  transition: all 0.6s ease-in-out;
+
+  &.active {
+    left: 1rem;
   }
 }
 </style>
